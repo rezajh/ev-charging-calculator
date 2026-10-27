@@ -111,6 +111,31 @@
     white-space: nowrap;
   }
 
+
+  .lang-btn {
+    border: 1px solid var(--field-border);
+    background: transparent;
+    color: var(--muted);
+    height: 40px; min-width: 44px; padding: 0 10px;
+    border-radius: 12px;
+    font: inherit; font-size: 13px; font-weight: 700;
+    cursor: pointer;
+  }
+  .lang-btn:hover { color: var(--text); }
+  .lang-btn:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+  /* English (LTR) overrides */
+  html[dir="ltr"] input[type="number"], html[dir="ltr"] input[type="time"] { padding: 0 50px 0 14px; }
+  html[dir="ltr"] select { padding: 0 42px 0 14px; background-position: right 14px center; }
+  html[dir="ltr"] .unit { left: auto; right: 13px; }
+  html[dir="ltr"] .dual-zone { left: auto; right: 0; }
+  html[dir="ltr"] .time .num + .t-unit + .num { margin-right: 0; margin-left: 8px; }
+  html[dir="ltr"] .stat strong, html[dir="ltr"] .compare-table th, html[dir="ltr"] .compare-table td { text-align: left; }
+  html[dir="ltr"] .info-tooltip { right: auto; left: 0; text-align: left; }
+  html[dir="ltr"] .info-tooltip::before { right: auto; left: 7px; }
+  @media (min-width: 601px) { html[dir="ltr"] .toggle-row .info-tooltip { right: auto; left: 0; } }
+  @media (max-width: 600px) { html[dir="ltr"] .info-tooltip { right: 16px; left: 16px; } }
+
   .theme-switcher {
     display: flex;
     align-items: center;
@@ -747,6 +772,7 @@
       </div>
     </div>
     <div class="header-tools">
+      <button type="button" class="lang-btn" id="langBtn">EN</button>
       <div class="theme-switcher" role="group" aria-label="انتخاب تم">
         <button type="button" class="theme-btn" data-theme-choice="light" title="روشن" aria-label="حالت روشن" aria-pressed="false">☀️</button>
         <button type="button" class="theme-btn" data-theme-choice="auto" title="خودکار" aria-label="حالت خودکار" aria-pressed="false">◐</button>
@@ -787,7 +813,7 @@
       <div class="range-row">
         <div class="range-head">
           <span id="socLabel">بازه شارژ</span>
-          <span class="range-value"><b id="fromValue">20</b>% ← <b id="toValue">80</b>%</span>
+          <span class="range-value"><b id="fromValue">20</b>% <span class="arr">←</span> <b id="toValue">80</b>%</span>
         </div>
         <div class="dual">
           <div class="dual-track" aria-hidden="true">
@@ -1052,6 +1078,88 @@
 
 <script>
   const $ = id => document.getElementById(id);
+const I18N_EN = {"محاسبه‌گر زمان شارژ": "EV Charging Calculator", "زمان تقریبی شارژ خودرو برقی بر اساس توان و ظرفیت باتری": "Estimated EV charging time based on power and battery capacity", "مشخصات باتری": "Battery", "مدل خودرو": "Car model", "تیپ / ظرفیت باتری": "Variant / battery capacity", "ظرفیت باتری (kWh)": "Battery capacity (kWh)", "سقف AC (kW)": "AC limit (kW)", "سقف DC (kW)": "DC limit (kW)", "بازه شارژ": "Charge range", "شارژ فعلی (%)": "Current charge (%)", "شارژ هدف (%)": "Target charge (%)", "ℹ️ شارژ بالای ۹۰٪ معمولاً کندتر انجام می‌شود، چون سیستم مدیریت باتری جریان را کم می‌کند؛ زمان واقعی احتمالاً بیشتر از زمان محاسبه‌شده خواهد بود. (ناحیه‌ی هاشورخورده‌ی نوار)": "ℹ️ Charging above 90% is usually slower because the battery management system reduces the current; the real time will probably be longer than the calculated time. (hatched area of the bar)", "مشخصات شارژر": "Charger", "نوع شارژر": "Charger type", "AC تک‌فاز": "AC single-phase", "AC سه‌فاز": "AC three-phase", "DC سریع": "DC fast", "DC شارژ سریع": "DC fast charging", "ولتاژ": "Voltage", "جریان": "Current", "توان خروجی شارژر DC": "DC charger output power", "توان خروجی شارژر": "Charger output power", "توان شارژر DC": "DC charger power", "راندمان شارژ": "Charging efficiency", "راندمان خودکار": "Automatic efficiency", "راندمان شارژ چیست؟": "What is charging efficiency?", "تمام انرژی برق ورودی به باتری ذخیره نمی‌شود و بخشی از آن در شارژر، کابل و سیستم‌های خودرو به گرما و تلفات تبدیل می‌شود.": "Not all the energy drawn from the grid ends up in the battery; part of it is lost as heat in the charger, the cable and the car's systems.", "در حالت خودکار، مقدار تقریبی بر اساس نوع شارژ انتخاب می‌شود:": "In automatic mode, an approximate value is chosen based on the charging type:", "تک‌فاز:": "single-phase:", "سه‌فاز:": "three-phase:", "این مقادیر تخمینی‌اند و برای محاسبه زمان تقریبی استفاده می‌شوند.": "These values are estimates, used to calculate an approximate time.", "استفاده از منحنی تقریبی شارژ DC": "Use approximate DC charging curve", "منحنی تقریبی شارژ DC": "Approximate DC charging curve", "این گزینه افت تدریجی توان شارژ DC را در طول شارژ به‌صورت تقریبی در نظر می‌گیرد.": "This option approximates the gradual drop in DC charging power during the session.", "در دنیای واقعی، توان شارژ به درصد شارژ باتری، دمای باتری، مدل خودرو و مشخصات شارژر بستگی دارد؛ بنابراین زمان محاسبه‌شده تقریبی است.": "In real life, charging power depends on the battery's state of charge, battery temperature, the car model and the charger specifications, so the calculated time is approximate.", "هزینه شارژ": "Charging cost", "هزینه تقریبی": "Approximate cost", "تومان/kWh": "Toman/kWh", "هزینه شارژ بر اساس انرژی موردنیاز، راندمان شارژ و تعرفه برق محاسبه می‌شود.": "Cost is calculated from the required energy, charging efficiency and electricity tariff.", "زمان تقریبی شارژ": "Estimated charging time", "ساعت": "h", "دقیقه": "min", "انرژی موردنیاز": "Energy needed", "توان شارژ": "Charging power", "ساعت وصل کردن": "Plug-in time", "پایان شارژ": "Finish time", "منحنی شارژ": "Charging curve", "شروع شارژ": "Start time", "روی نمودار بزنید یا نشانگر را حرکت دهید تا ببینید در هر ساعت باتری حدوداً (به‌صورت تخمینی) چند درصد شارژ شده است.": "Tap the chart or move the pointer to see roughly (as an estimate) what percent the battery is charged at each hour.", "مقایسه شارژرها": "Charger comparison", "شارژر": "Charger", "توان واقعی": "Actual power", "زمان": "Time", "انتخاب تم": "Choose theme", "روشن": "Light", "حالت روشن": "Light mode", "خودکار": "Auto", "حالت خودکار": "Auto mode", "تیره": "Dark", "حالت تیره": "Dark mode", "شارژ فعلی": "Current charge", "شارژ هدف": "Target charge", "توضیح راندمان شارژ": "About charging efficiency", "توضیحات منحنی تقریبی شارژ DC": "About the approximate DC charging curve", "تعرفه برق (تومان بر کیلووات‌ساعت)": "Electricity tariff (Toman per kWh)", "نمودار درصد باتری بر حسب ساعت. با کلیدهای چپ و راست ساعت را جابه‌جا کنید.": "Battery percentage by clock time. Use the left and right arrow keys to move the time."};
+const CAR_EN = {"فونیکس FX EV / OMODA E5": "Phoenix FX EV / OMODA E5", "فولکس‌واگن ID.UNYX (06)": "Volkswagen ID.UNYX (06)", "آریزو 5 EV": "Arrizo 5 EV", "هونگچی E-QM5": "Hongqi E-QM5", "اسکای‌ول ET5": "Skywell ET5", "هوندا e:NS1": "Honda e:NS1", "فولکس‌واگن ID.4": "Volkswagen ID.4", "آئودی Q5 e-tron": "Audi Q5 e-tron", "آئودی Q4 e-tron": "Audi Q4 e-tron", "لونا GRE (برقی)": "Luna GRE (electric)", "✏️ خودروی دلخواه (ورود دستی)": "✏️ Custom car (manual entry)", "تیپ استاندارد": "Standard", "آریزو 5e": "Arrizo 5e", "آریزو e (فیس‌لیفت)": "Arrizo e (facelift)", "NMC (بزرگ)": "NMC (large)", "نسخه 72": "72 version", "نسخه 86": "86 version", "ورود دستی مشخصات": "Manual entry"};
+
+  // ---------- language ----------
+  const LANG_KEY = "ev-calc-lang";
+  let LANG = "fa";
+  try { LANG = localStorage.getItem(LANG_KEY) === "en" ? "en" : "fa"; } catch (e) {}
+  const isEn = () => LANG === "en";
+  const FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
+  const toLat = x => x.replace(/[۰-۹]/g, d => FA_DIGITS.indexOf(d)).replace(/٪/g, "%");
+  const trCar = x => isEn() ? (CAR_EN[x] || x) : x;
+  const ARROW = () => isEn() ? "→" : "←";
+  const STR = {
+    fa: {
+      tomorrow: "فردا", inDays: n => n + " روز بعد",
+      noteAc: "در شارژ AC توان ثابت فرض شده است.",
+      noteNoCurve: "منحنی DC غیرفعال است؛ توان ثابت فرض شده است.",
+      noteCar: "منحنی تقریبی مخصوص همین خودرو؛ مقدار واقعی به دما و شارژر بستگی دارد.",
+      noteGeneric: "منحنی عمومی تقریبی؛ برای این خودرو داده‌ی اختصاصی نداریم.",
+      time: (h, m) => h + " ساعت " + m + " دقیقه",
+      ac1: "AC تک‌فاز", ac3: "AC سه‌فاز",
+      usable: " (مفید)",
+      limit: (r, v, p) => `توان شارژر ${r} kW است، اما سقف تقریبی خودرو ${v} kW است؛ محاسبه با ${p} kW انجام شد.`,
+      cost: n => n.toLocaleString("fa-IR") + " تومان",
+      warn20: "⚠️ شارژ پیوسته با این جریان فشار زیادی به سیم‌کشی و کلید مدار وارد می‌کند؛ حتماً پیش از استفاده با برق‌کار بررسی کنید و از سه‌راهی و کابل رابط معمولی استفاده نکنید.",
+      warn16: "ℹ️ شارژ چندساعته با این جریان بار پیوسته است؛ پیش از استفاده از ظرفیت سیم‌کشی و کلید مدار مطمئن شوید.",
+      warn10: "ℹ️ این جریان تقریباً در حد پریز معمولی است؛ شارژ بسیار کند است و پریز و سیم‌کشی باید برای بار پیوسته سالم باشد.",
+      pageTitle: "محاسبه‌گر زمان شارژ خودرو برقی", langLabel: "زبان"
+    },
+    en: {
+      tomorrow: "tomorrow", inDays: n => "in " + n + " days",
+      noteAc: "AC charging power is assumed constant.",
+      noteNoCurve: "DC curve is disabled; power is assumed constant.",
+      noteCar: "Approximate curve specific to this car; real values depend on temperature and the charger.",
+      noteGeneric: "Generic approximate curve; we have no car-specific data for this vehicle.",
+      time: (h, m) => h + "h " + m + "m",
+      ac1: "AC 1-phase", ac3: "AC 3-phase",
+      usable: " (usable)",
+      limit: (r, v, p) => `Charger power is ${r} kW, but the car's approximate limit is ${v} kW; calculated with ${p} kW.`,
+      cost: n => n.toLocaleString("en-US") + " Toman",
+      warn20: "⚠️ Charging continuously at this current puts a lot of stress on the wiring and the circuit breaker; have an electrician check it before use, and do not use power strips or ordinary extension cables.",
+      warn16: "ℹ️ A multi-hour charge at this current is a continuous load; make sure the wiring and circuit breaker can handle it before use.",
+      warn10: "ℹ️ This current is about the level of a normal wall socket; charging is very slow, and the socket and wiring must be in good condition for a continuous load.",
+      pageTitle: "EV Charging Time Calculator", langLabel: "Language"
+    }
+  };
+  const S = k => STR[LANG][k];
+
+  // collect translatable text nodes / attributes once, before any dynamic content is added
+  const i18nNodes = [], i18nAttrs = [];
+  (function collect() {
+    const hasFa = x => /[\u0600-\u06ff]/.test(x);
+    const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => n.parentNode.closest("script,style") ? NodeFilter.FILTER_REJECT
+        : (hasFa(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT)
+    });
+    let n; while ((n = w.nextNode())) i18nNodes.push({ node: n, orig: n.nodeValue });
+    document.querySelectorAll("[aria-label],[title]").forEach(el => {
+      ["aria-label", "title"].forEach(a => {
+        const v = el.getAttribute(a);
+        if (v && hasFa(v)) i18nAttrs.push({ el, a, orig: v });
+      });
+    });
+  })();
+  const trText = orig => {
+    if (!isEn()) return orig;
+    const t = orig.trim();
+    const en = I18N_EN[t] !== undefined ? I18N_EN[t] : toLat(t);
+    return orig.replace(t, en);
+  };
+  function applyStaticLang() {
+    const root = document.documentElement;
+    root.lang = LANG; root.dir = isEn() ? "ltr" : "rtl";
+    i18nNodes.forEach(o => { o.node.nodeValue = trText(o.orig); });
+    i18nAttrs.forEach(o => { o.el.setAttribute(o.a, isEn() ? (I18N_EN[o.orig] || toLat(o.orig)) : o.orig); });
+    document.title = S("pageTitle");
+    document.querySelectorAll(".arr").forEach(a => { a.textContent = ARROW(); });
+    const b = $("langBtn");
+    b.textContent = isEn() ? "فا" : "EN";
+    b.setAttribute("aria-label", isEn() ? "زبان: فارسی" : "Language: English");
+    b.title = b.getAttribute("aria-label");
+  }
 
   const defaults = {
     "1": { voltage: 220, amp: 10, efficiency: 90 },
@@ -1146,23 +1254,25 @@
     m.variants.forEach(v => {
       const opt = document.createElement("option");
       opt.value = v.id;
-      opt.textContent = m.id === "custom" ? v.label
-        : v.label + " — " + (v.batteryUsable || v.batteryGross) + " kWh" + (v.batteryUsable ? " (مفید)" : "");
+      opt.textContent = m.id === "custom" ? trCar(v.label)
+        : trCar(v.label) + " — " + (v.batteryUsable || v.batteryGross) + " kWh" + (v.batteryUsable ? S("usable") : "");
       sel.appendChild(opt);
     });
     sel.value = m.variants[0].id;
   }
 
-  (function fillModels() {
+  function fillModels() {
     const sel = $("carModel");
+    sel.innerHTML = "";
     carModels.forEach(m => {
       const opt = document.createElement("option");
-      opt.value = m.id; opt.textContent = m.name;
+      opt.value = m.id; opt.textContent = trCar(m.name);
       sel.appendChild(opt);
     });
     sel.value = "phoenix";
     fillVariants();
-  })();
+  }
+  fillModels();
 
   function updateEfficiencyForMode() {
     if (!$("autoEfficiency").checked) return;
@@ -1214,7 +1324,7 @@
     const m = ((Math.round(total) % 1440) + 1440) % 1440;
     return { t: String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"), d: day };
   }
-  function dayWord(d) { return d <= 0 ? "" : (d === 1 ? "فردا" : d + " روز بعد"); }
+  function dayWord(d) { return d <= 0 ? "" : (d === 1 ? S("tomorrow") : S("inDays")(d)); }
 
   function drawChart(battery, from, to, eff, phase, power, useCurve, limit, requested) {
     const pts = [[0, from]]; let t = 0;
@@ -1268,10 +1378,10 @@
       `<g id="chartCursor"></g>`;
     chartState = { pts, tm, st, W, L, R, T, ph, pw, cursor: null };
 
-    $("chartNote").textContent = phase !== "dc" ? "در شارژ AC توان ثابت فرض شده است."
-      : !useCurve ? "منحنی DC غیرفعال است؛ توان ثابت فرض شده است."
-      : limit && limit.curve ? "منحنی تقریبی مخصوص همین خودرو؛ مقدار واقعی به دما و شارژر بستگی دارد."
-      : "منحنی عمومی تقریبی؛ برای این خودرو داده‌ی اختصاصی نداریم.";
+    $("chartNote").textContent = phase !== "dc" ? S("noteAc")
+      : !useCurve ? S("noteNoCurve")
+      : limit && limit.curve ? S("noteCar")
+      : S("noteGeneric");
   }
 
   function showCursor(elapsed) {
@@ -1312,7 +1422,7 @@
 
   function fmtTime(mins) {
     mins = Math.max(0, Math.round(mins));
-    return Math.floor(mins / 60) + " ساعت " + (mins % 60) + " دقیقه";
+    return S("time")(Math.floor(mins / 60), mins % 60);
   }
 
   function updateCompare(battery, from, to, efficiency, limit) {
@@ -1321,10 +1431,10 @@
 
     // kind: "1" = AC single-phase 220 V, "3" = AC three-phase 380 V, "dc" = DC fast charger
     const rows = [
-      ["AC تک‌فاز 8A",  8 * 220 / 1000,                    "1"],
-      ["AC تک‌فاز 16A", 16 * 220 / 1000,                   "1"],
-      ["AC تک‌فاز 32A", 32 * 220 / 1000,                   "1"],
-      ["AC سه‌فاز 16A", Math.sqrt(3) * 380 * 16 / 1000,    "3"],
+      [S("ac1") + " 8A",  8 * 220 / 1000,                    "1"],
+      [S("ac1") + " 16A", 16 * 220 / 1000,                   "1"],
+      [S("ac1") + " 32A", 32 * 220 / 1000,                   "1"],
+      [S("ac3") + " 16A", Math.sqrt(3) * 380 * 16 / 1000,    "3"],
       ["DC 60kW",       60,                                "dc"],
       ["DC 120kW",      120,                               "dc"]
     ];
@@ -1349,7 +1459,9 @@
 
   function syncUi(from, to) {
     // dual-handle bar: fill between the two handles (RTL: 0% is on the right)
-    $("dualFill").style.right = from + "%";
+    const ltr = isEn();
+    $("dualFill").style.right = ltr ? "auto" : from + "%";
+    $("dualFill").style.left = ltr ? from + "%" : "auto";
     $("dualFill").style.width = Math.max(0, to - from) + "%";
     // when the two handles overlap, keep on top the one that has more room to move
     $("from").style.zIndex = from > (100 - to) ? 3 : 2;
@@ -1431,7 +1543,7 @@
     $("minutes").textContent = mins % 60;
     $("energy").textContent = energy.toFixed(1) + " kWh";
     $("resultPower").textContent = power.toFixed(2) + " kW";
-    $("percent").textContent = from + "% ← " + to + "%";
+    $("percent").textContent = from + "% " + ARROW() + " " + to + "%";
     $("resultAmp").textContent = phase === "dc"
       ? "DC"
       : (parseFloat($("amp").value) || 0).toFixed(1).replace(".0", "") + " A";
@@ -1439,14 +1551,13 @@
     if ($("limitNote")) {
       $("limitNote").textContent =
         vehicleLimit && requested > vehicleLimit
-          ? `توان شارژر ${requested.toFixed(1)} kW است، اما سقف تقریبی خودرو ${vehicleLimit} kW است؛ محاسبه با ${power.toFixed(1)} kW انجام شد.`
+          ? S("limit")(requested.toFixed(1), vehicleLimit, power.toFixed(1))
           : "";
     }
 
     const tariff = parseFloat($("tariff").value) || 0;
     $("costResult").textContent = tariff > 0
-      ? (energy / Math.max(.01, efficiency / 100) * tariff)
-          .toLocaleString("fa-IR") + " تومان"
+      ? S("cost")(Math.round(energy / Math.max(.01, efficiency / 100) * tariff))
       : "—";
 
     updateCompare(battery, from, to, efficiency, limit);
@@ -1465,9 +1576,9 @@
       b.setAttribute("aria-pressed", on);
     });
     let msg = "";
-    if (phase !== "dc" && amps >= 20) msg = "⚠️ شارژ پیوسته با این جریان فشار زیادی به سیم‌کشی و کلید مدار وارد می‌کند؛ حتماً پیش از استفاده با برق‌کار بررسی کنید و از سه‌راهی و کابل رابط معمولی استفاده نکنید.";
-    else if (phase !== "dc" && amps >= 16) msg = "ℹ️ شارژ چندساعته با این جریان بار پیوسته است؛ پیش از استفاده از ظرفیت سیم‌کشی و کلید مدار مطمئن شوید.";
-    else if (phase !== "dc" && amps > 0 && amps <= 10) msg = "ℹ️ این جریان تقریباً در حد پریز معمولی است؛ شارژ بسیار کند است و پریز و سیم‌کشی باید برای بار پیوسته سالم باشد.";
+    if (phase !== "dc" && amps >= 20) msg = S("warn20");
+    else if (phase !== "dc" && amps >= 16) msg = S("warn16");
+    else if (phase !== "dc" && amps > 0 && amps <= 10) msg = S("warn10");
     $("safetyNote").textContent = msg;
     $("safetyNote").style.display = msg ? "" : "none";
     $("highSocNote").style.display = to > 90 ? "" : "none";
@@ -1475,7 +1586,7 @@
     const [hh, mm] = ($("plugTime").value || "23:00").split(":").map(Number);
     const tot = hh * 60 + mm + mins, days = Math.floor(tot / 1440);
     $("doneAt").textContent = String(Math.floor(tot / 60) % 24).padStart(2, "0") + ":" + String(tot % 60).padStart(2, "0") +
-      (days > 0 ? (days === 1 ? " (فردا)" : ` (${days} روز بعد)`) : "");
+      (days > 0 ? " (" + dayWord(days) + ")" : "");
   }
 
   function resetChargerFields() {
@@ -1607,6 +1718,18 @@
     });
   });
 
+  function setLang(l) {
+    LANG = l;
+    try { localStorage.setItem(LANG_KEY, l); } catch (e) {}
+    const mv = $("carModel").value, vv = $("carVariant").value;
+    fillModels();
+    $("carModel").value = mv; fillVariants(); $("carVariant").value = vv;
+    applyStaticLang();
+    calculate();
+  }
+  $("langBtn").addEventListener("click", () => setLang(isEn() ? "fa" : "en"));
+
+  applyStaticLang();
   resetChargerFields();
 </script>
 
