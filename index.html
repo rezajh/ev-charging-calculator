@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0B1013">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="شارژ EV">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>محاسبه‌گر زمان شارژ خودرو برقی</title>
+<style>
+@font-face{font-family:'Vazirmatn';font-weight:400;font-display:swap;src:url(fonts/Vazirmatn-Regular.woff2) format('woff2')}
+@font-face{font-family:'Vazirmatn';font-weight:500;font-display:swap;src:url(fonts/Vazirmatn-Medium.woff2) format('woff2')}
+@font-face{font-family:'Vazirmatn';font-weight:700;font-display:swap;src:url(fonts/Vazirmatn-Bold.woff2) format('woff2')}
+@font-face{font-family:'Vazirmatn';font-weight:800;font-display:swap;src:url(fonts/Vazirmatn-ExtraBold.woff2) format('woff2')}
+  :root {
+    color-scheme: dark;
+    --bg: #0B1013;
+    --card: #131B20;
+    --card-solid: #131B20;
+    --border: #22303A;
+    --field-bg: #0B1013;
+    --field-border: #2C3C47;
+    --text: #E8F1F5;
+    --muted: #9DB0BB;
+    --primary: #3DDCFF;
+    --accent: #B8F34A;
+    --range-fill: #B8F34A;
+    --track: #22303A;
+    --thumb-ring: #131B20;
+    --tip-bg: #0E161B;
+    --chip-bg: #3DDCFF;
+    --chip-text: #0B1013;
+    --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239DB0BB' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    --radius: 20px;
+  }
+
+  html[data-theme="light"] {
+    color-scheme: light;
+    --bg: #EDF2F4;
+    --card: #FFFFFF;
+    --card-solid: #FFFFFF;
+    --border: #D6E0E5;
+    --field-bg: #F5F8F9;
+    --field-border: #BFCCD3;
+    --text: #0F1A20;
+    --muted: #4A5D69;
+    --primary: #0B7C99;
+    --range-fill: #0B7C99;
+    --track: #D6E0E5;
+    --thumb-ring: #FFFFFF;
+    --tip-bg: #FFFFFF;
+    --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234A5D69' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Vazirmatn', Tahoma, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  button, input, select { font-family: inherit; }
+
+  .container {
+    width: min(1120px, calc(100% - 28px));
+    margin: 0 auto;
+    padding: 28px 0 46px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+
+  .brand { display: flex; align-items: center; gap: 12px; }
+
+  .logo {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--card);
+    border: 1px solid var(--field-border);
+    color: var(--range-fill);
+  }
+
+  h1 { margin: 0; font-size: clamp(19px, 4vw, 26px); font-weight: 800; line-height: 1.3; }
+  .subtitle { margin: 3px 0 0; color: var(--muted); font-size: 12.5px; }
+
+  .header-tools { display: flex; align-items: center; gap: 10px; }
+
+  .badge {
+    padding: 7px 14px;
+    border: 1px solid var(--field-border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 11.5px;
+    white-space: nowrap;
+  }
+
+  .theme-switcher {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px;
+    border: 1px solid var(--field-border);
+    border-radius: 12px;
+    background: var(--field-bg);
+  }
+
+  .theme-btn {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    width: 36px;
+    height: 34px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .theme-btn:hover { color: var(--text); }
+
+  .theme-btn.active {
+    background: var(--chip-bg);
+    color: var(--chip-text);
+  }
+
+  .theme-btn:focus-visible,
+  .seg button:focus-visible,
+  .quick button:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* layout: inputs in one column, results in the other; on phones the result follows the inputs */
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+    gap: 18px;
+    align-items: start;
+  }
+
+  .col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .card-title::before {
+    content: "";
+    width: 5px;
+    height: 18px;
+    border-radius: 3px;
+    background: var(--range-fill);
+  }
+
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .field { min-width: 0; }
+
+  label, .field-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .input-wrap { position: relative; }
+
+  input[type="number"], input[type="time"], select {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px 0 50px;
+    border: 1px solid var(--field-border);
+    border-radius: 12px;
+    outline: none;
+    color: var(--text);
+    background: var(--field-bg);
+    font-size: 16px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 0 14px 0 42px;
+    font-weight: 500;
+    background-image: var(--chev);
+    background-repeat: no-repeat;
+    background-position: left 14px center;
+    cursor: pointer;
+  }
+
+  input[type="number"]:focus, input[type="time"]:focus, select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 28%, transparent);
+  }
+
+  input[type="number"]:disabled { opacity: .6; cursor: not-allowed; }
+
+  select option { background: var(--card-solid); color: var(--text); }
+
+  .unit {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 12px;
+    pointer-events: none;
+  }
+
+  .stack { display: flex; flex-direction: column; gap: 14px; }
+
+  /* charger type: segmented buttons */
+  .seg {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--field-border);
+    border-radius: 12px;
+    background: var(--field-bg);
+  }
+
+  .seg button {
+    height: 40px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .seg button:hover { color: var(--text); }
+
+  .seg button.active {
+    background: var(--chip-bg);
+    color: var(--chip-text);
+    font-weight: 800;
+  }
+
+  /* charge range: one bar, two handles */
+  .range-row {
+    margin-top: 18px;
+    padding: 16px;
+    background: var(--field-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+
+  .range-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .range-value {
+    color: var(--primary);
+    font-weight: 800;
+    border: 1px solid var(--field-border);
+    padding: 3px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .dual { position: relative; height: 44px; margin: 4px 0 2px; }
+
+  .dual-track {
+    position: absolute;
+    top: 50%;
+    height: 10px;
+    margin-top: -5px;
+    right: 14px;
+    left: 14px;
+    border-radius: 6px;
+    background: var(--track);
+    overflow: hidden;
+  }
+
+  .dual-fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 20%;
+    width: 60%;
+    background: var(--range-fill);
+  }
+
+  .dual-zone {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 10%;
+    background: repeating-linear-gradient(135deg, rgba(0,0,0,.28) 0 3px, transparent 3px 6px);
+    pointer-events: none;
+  }
+
+  .dual input[type="range"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    height: 44px;
+    margin: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: none;
+  }
+
+  .dual input[type="range"]::-webkit-slider-runnable-track { height: 44px; background: transparent; border: 0; }
+  .dual input[type="range"]::-moz-range-track { height: 44px; background: transparent; border: 0; }
+
+  .dual input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    margin-top: 8px;
+    border-radius: 50%;
+    background: var(--range-fill);
+    border: 4px solid var(--thumb-ring);
+    box-shadow: 0 0 0 1px var(--field-border), 0 3px 8px rgba(0,0,0,.3);
+    cursor: grab;
+    pointer-events: auto;
+  }
+
+  .dual input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--range-fill);
+    border: 4px solid var(--thumb-ring);
+    box-shadow: 0 0 0 1px var(--field-border), 0 3px 8px rgba(0,0,0,.3);
+    cursor: grab;
+    pointer-events: auto;
+  }
+
+  .dual input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--primary); outline-offset: 2px; }
+  .dual input[type="range"]:focus-visible::-moz-range-thumb { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+  .dual-scale {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 6px;
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+
+  .soc-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .soc-inputs input {
+    padding: 0 14px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .soc-inputs label { margin-bottom: 6px; }
+
+  input[type="range"] { accent-color: var(--range-fill); cursor: pointer; }
+
+  .range-input-row {
+    display: grid;
+    grid-template-columns: 1fr 82px;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .range-number {
+    height: 42px !important;
+    padding: 0 10px !important;
+    text-align: center;
+  }
+
+  .hidden { display: none !important; }
+
+  #dcPowerSliderRow { margin-top: 16px; }
+
+  .quick {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  #quickDcPower { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 10px; }
+
+  .quick button {
+    height: 44px;
+    border: 1px solid var(--field-border);
+    background: var(--field-bg);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 0 2px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    direction: ltr;
+    transition: border-color .15s, background .15s;
+  }
+
+  .quick button:hover { border-color: var(--primary); }
+
+  .quick button.active {
+    background: var(--chip-bg);
+    border-color: var(--chip-bg);
+    color: var(--chip-text);
+    font-weight: 800;
+  }
+
+  .toggle-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  .toggle-row input { accent-color: var(--primary); width: 17px; height: 17px; }
+
+  .limit-note {
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  /* result card: same dark surface in both themes */
+  .result {
+    color-scheme: dark;
+    background:
+      radial-gradient(circle at 88% 0%, rgba(184,243,74,.13), transparent 46%),
+      linear-gradient(160deg, #11201A 0%, #0B1013 72%);
+    border: 1px solid #2C3C47;
+    color: #E8F1F5;
+  }
+
+  .result .card-title::before { background: #B8F34A; }
+
+  .result-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .result-label { color: #9DB0BB; font-size: 13px; font-weight: 600; }
+
+  .range-chip {
+    color: #B8F34A;
+    border: 1px solid rgba(184,243,74,.45);
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-size: 13px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .time {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    margin: 14px 0 18px;
+  }
+
+  .time .num {
+    font-size: clamp(46px, 9vw, 64px);
+    font-weight: 800;
+    line-height: 1;
+    color: #B8F34A;
+  }
+
+  .time .num + .t-unit + .num { margin-right: 8px; }
+
+  .time .t-unit { font-size: 16px; color: #C5D3DB; font-weight: 500; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .stat {
+    padding: 11px 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid #2C3C47;
+  }
+
+  .stat small { display: block; color: #9DB0BB; font-size: 11px; margin-bottom: 4px; }
+  .stat strong { display: block; direction: ltr; text-align: right; font-size: 15px; color: #E8F1F5; }
+
+  .plug-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .plug-tile {
+    padding: 11px 12px;
+    border-radius: 14px;
+    border: 1px solid #2C3C47;
+    background: rgba(255,255,255,.05);
+  }
+
+  .plug-tile label, .plug-tile small {
+    display: block;
+    margin: 0 0 4px;
+    font-size: 11px;
+    color: #9DB0BB;
+    font-weight: 400;
+  }
+
+  .plug-tile input[type="time"] {
+    height: 34px;
+    padding: 0 8px;
+    font-size: 15px;
+    font-weight: 700;
+    background: transparent;
+    border-color: transparent;
+    color: #E8F1F5;
+  }
+
+  .plug-tile.finish { border-color: rgba(184,243,74,.45); }
+  .plug-tile.finish strong { font-size: 17px; color: #B8F34A; line-height: 34px; }
+
+  /* cost / compare / chart */
+  .feature-card { padding: 0; }
+
+  .feature-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .feature-value { color: var(--primary); font-weight: 800; }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .compare-table th,
+  .compare-table td {
+    padding: 9px 7px;
+    border-bottom: 1px solid var(--border);
+    text-align: right;
+  }
+
+  .compare-table th { color: var(--muted); font-weight: 700; }
+  .compare-table td strong { display: inline-block; direction: ltr; color: var(--primary); }
+
+  /* info tooltips */
+  .info-tip {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 20px;
+    border: 1px solid var(--primary);
+    border-radius: 50%;
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 800;
+    cursor: help;
+    z-index: 50;
+  }
+
+  .info-tip:hover, .info-tip:focus { outline: none; background: color-mix(in srgb, var(--primary) 16%, transparent); }
+  .info-tip:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+  .info-tooltip {
+    position: absolute;
+    z-index: 9999;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 310px;
+    max-width: min(310px, calc(100vw - 40px));
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    border: 1px solid var(--field-border);
+    border-radius: 14px;
+    background: var(--tip-bg);
+    color: var(--text);
+    box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.85;
+    text-align: right;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease, visibility .18s;
+  }
+
+  .info-tooltip::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    right: 7px;
+    width: 11px;
+    height: 11px;
+    background: var(--tip-bg);
+    border-left: 1px solid var(--field-border);
+    border-top: 1px solid var(--field-border);
+    transform: rotate(45deg);
+  }
+
+  .info-tooltip strong { color: var(--primary); font-size: 13px; line-height: 1.5; }
+  .info-tooltip b { color: var(--text); }
+
+  .info-tip:hover .info-tooltip,
+  .info-tip:focus .info-tooltip,
+  .info-tip:focus-within .info-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* tooltips inside toggle rows anchor to the whole row so they never run off-screen */
+  @media (min-width: 601px) {
+    .toggle-row .info-tip { position: static; }
+    .toggle-row .info-tooltip { right: 0; left: auto; }
+    .toggle-row .info-tooltip::before { display: none; }
+  }
+
+  @media (max-width: 600px) {
+    .info-tooltip {
+      position: fixed;
+      top: auto;
+      right: 16px;
+      left: 16px;
+      bottom: 16px;
+      width: auto;
+      max-width: none;
+      padding: 16px 17px;
+      border-radius: 16px;
+      transform: translateY(8px);
+    }
+    .info-tooltip::before { display: none; }
+    .info-tip:hover .info-tooltip,
+    .info-tip:focus .info-tooltip,
+    .info-tip:focus-within .info-tooltip { transform: translateY(0); }
+    .compare-table { font-size: 11px; }
+  }
+
+  @media (max-width: 760px) {
+    .container { width: min(100% - 18px, 600px); padding-top: 16px; }
+    .badge, .subtitle { display: none; }
+    .grid, .col { display: contents; }
+    .grid { display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+    #batteryCard { order: 1; }
+    #chargerCard { order: 2; }
+    #resultCard  { order: 3; }
+    #chartCard   { order: 4; }
+    #compareCard { order: 5; }
+    #costCard    { order: 6; }
+    .card { padding: 18px; }
+  }
+
+  @media (max-width: 430px) {
+    .fields { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stats .stat:last-child { grid-column: 1 / -1; }
+    .quick button { font-size: 12px; }
+  }
+  .chart-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .chart-head .card-title { margin: 0; }
+  .chart-start { display: flex; align-items: center; gap: 8px; }
+  .chart-start label { margin: 0; font-size: 12px; }
+  .chart-start input[type="time"] { width: auto; height: 38px; padding: 0 10px; font-size: 15px; font-weight: 700; }
+  #chartSvg { touch-action: pan-y; cursor: crosshair; border-radius: 10px; }
+  #chartSvg:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+      </div>
+      <div>
+        <h1>محاسبه‌گر زمان شارژ</h1>
+        <p class="subtitle">زمان تقریبی شارژ خودرو برقی بر اساس توان و ظرفیت باتری</p>
+      </div>
+    </div>
+    <div class="header-tools">
+      <div class="theme-switcher" role="group" aria-label="انتخاب تم">
+        <button type="button" class="theme-btn" data-theme-choice="light" title="روشن" aria-label="حالت روشن" aria-pressed="false">☀️</button>
+        <button type="button" class="theme-btn" data-theme-choice="auto" title="خودکار" aria-label="حالت خودکار" aria-pressed="false">◐</button>
+        <button type="button" class="theme-btn" data-theme-choice="dark" title="تیره" aria-label="حالت تیره" aria-pressed="false">🌙</button>
+      </div>
+      <div class="badge">EV Charging</div>
+    </div>
+  </header>
+
+<main class="grid">
+  <div class="col">
+
+    <section class="card" id="batteryCard">
+      <h2 class="card-title">مشخصات باتری</h2>
+
+      <div class="fields">
+        <div class="field" style="grid-column:1/-1">
+          <label for="carModel">مدل خودرو</label>
+          <div class="input-wrap">
+            <select id="carModel"></select>
+          </div>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label for="carVariant">تیپ / ظرفیت باتری</label>
+          <div class="input-wrap">
+            <select id="carVariant"></select>
+          </div>
+        </div>
+        <div class="field hidden" id="customCarFields" style="grid-column:1/-1">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <div><label for="customBattery">ظرفیت باتری (kWh)</label><input id="customBattery" type="number" min="5" step="0.1" value="60" style="padding:0 10px"></div>
+            <div><label for="customAc">سقف AC (kW)</label><input id="customAc" type="number" min="1" step="0.1" value="7.4" style="padding:0 10px"></div>
+            <div><label for="customDc">سقف DC (kW)</label><input id="customDc" type="number" min="1" step="1" value="60" style="padding:0 10px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="range-row">
+        <div class="range-head">
+          <span id="socLabel">بازه شارژ</span>
+          <span class="range-value"><b id="fromValue">20</b>% ← <b id="toValue">80</b>%</span>
+        </div>
+        <div class="dual">
+          <div class="dual-track" aria-hidden="true">
+            <div class="dual-fill" id="dualFill"></div>
+            <div class="dual-zone"></div>
+          </div>
+          <input id="from" type="range" min="0" max="100" step="1" value="20" aria-label="شارژ فعلی">
+          <input id="to" type="range" min="0" max="100" step="1" value="80" aria-label="شارژ هدف">
+        </div>
+        <div class="dual-scale" aria-hidden="true"><span>۰</span><span>۲۵</span><span>۵۰</span><span>۷۵</span><span>۱۰۰</span></div>
+
+        <div class="soc-inputs">
+          <div>
+            <label for="fromNumber">شارژ فعلی (%)</label>
+            <input id="fromNumber" type="number" min="0" max="99" value="20">
+          </div>
+          <div>
+            <label for="toNumber">شارژ هدف (%)</label>
+            <input id="toNumber" type="number" min="1" max="100" value="80">
+          </div>
+        </div>
+        <div class="limit-note" id="highSocNote" style="display:none">ℹ️ شارژ بالای ۹۰٪ معمولاً کندتر انجام می‌شود، چون سیستم مدیریت باتری جریان را کم می‌کند؛ زمان واقعی احتمالاً بیشتر از زمان محاسبه‌شده خواهد بود. (ناحیه‌ی هاشورخورده‌ی نوار)</div>
+      </div>
+    </section>
+
+    <section class="card" id="chargerCard">
+      <h2 class="card-title">مشخصات شارژر</h2>
+
+      <div class="field" style="margin-bottom:14px">
+        <span class="field-label" id="phaseLabel">نوع شارژر</span>
+        <div class="seg" role="group" aria-labelledby="phaseLabel" id="phaseTabs">
+          <button type="button" data-phase="1" aria-pressed="true">AC تک‌فاز</button>
+          <button type="button" data-phase="3" aria-pressed="false">AC سه‌فاز</button>
+          <button type="button" data-phase="dc" aria-pressed="false">DC سریع</button>
+        </div>
+        <select id="phase" hidden>
+          <option value="1" selected>AC تک‌فاز</option>
+          <option value="3">AC سه‌فاز</option>
+          <option value="dc">DC شارژ سریع</option>
+        </select>
+      </div>
+
+      <div class="fields">
+        <div class="field" id="acVoltageField">
+          <label for="voltage">ولتاژ</label>
+          <div class="input-wrap">
+            <input id="voltage" type="number" min="1" step="1" value="220">
+            <span class="unit">V</span>
+          </div>
+        </div>
+
+        <div class="field" id="acAmpField">
+          <label for="amp">جریان</label>
+          <div class="input-wrap">
+            <input id="amp" type="number" min="1" step="0.1" value="10">
+            <span class="unit">A</span>
+          </div>
+        </div>
+
+        <div class="field hidden" id="dcPowerField">
+          <label for="dcPower">توان خروجی شارژر DC</label>
+          <div class="input-wrap">
+            <input id="dcPower" type="number" min="10" max="200" step="1" value="60">
+            <span class="unit">kW</span>
+          </div>
+        </div>
+
+        <div class="field" id="acPowerField">
+          <label for="power">توان خروجی شارژر</label>
+          <div class="input-wrap">
+            <input id="power" type="number" min="0.1" step="0.1" value="7.04" readonly>
+            <span class="unit">kW</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="range-row hidden" id="dcPowerSliderRow">
+        <div class="range-head">
+          <span>توان شارژر DC</span>
+          <span class="range-value"><b id="dcPowerValue">60</b> kW</span>
+        </div>
+        <div class="range-input-row">
+          <input id="dcPowerSlider" type="range" min="10" max="200" step="1" value="60" aria-label="توان شارژر DC">
+          <input id="dcPowerNumber" class="range-number" type="number" min="10" max="200" step="1" value="60" aria-label="توان شارژر DC">
+        </div>
+      </div>
+
+      <div class="quick hidden" id="quickDcPower">
+        <button type="button" data-dc-power="30">۳۰ kW</button>
+        <button type="button" data-dc-power="60">۶۰ kW</button>
+        <button type="button" data-dc-power="80">۸۰ kW</button>
+        <button type="button" data-dc-power="120">۱۲۰ kW</button>
+      </div>
+
+      <div class="quick" id="quickAmps">
+        <button type="button" data-a="8">۸ A</button>
+        <button type="button" data-a="10">۱۰ A</button>
+        <button type="button" data-a="16">۱۶ A</button>
+        <button type="button" data-a="20">۲۰ A</button>
+        <button type="button" data-a="24">۲۴ A</button>
+        <button type="button" data-a="32">۳۲ A</button>
+      </div>
+
+      <div class="field" style="margin-top:16px">
+        <label for="efficiency">راندمان شارژ</label>
+        <div class="input-wrap">
+          <input id="efficiency" type="number" min="50" max="100" step="1" value="90">
+          <span class="unit">%</span>
+        </div>
+        <div class="toggle-row">
+          <input id="autoEfficiency" type="checkbox" checked>
+          <label for="autoEfficiency" style="margin:0;cursor:pointer;font-weight:normal">راندمان خودکار</label>
+          <span class="info-tip" tabindex="0" aria-label="توضیح راندمان شارژ">
+            ?
+            <span class="info-tooltip">
+              <strong>راندمان شارژ چیست؟</strong>
+              <span>تمام انرژی برق ورودی به باتری ذخیره نمی‌شود و بخشی از آن در شارژر، کابل و سیستم‌های خودرو به گرما و تلفات تبدیل می‌شود.</span>
+              <span>در حالت خودکار، مقدار تقریبی بر اساس نوع شارژ انتخاب می‌شود:</span>
+              <span><bdi>AC</bdi> تک‌فاز: <b>90٪</b></span>
+              <span><bdi>AC</bdi> سه‌فاز: <b>92٪</b></span>
+              <span><bdi>DC</bdi>: <b>94٪</b></span>
+              <span>این مقادیر تخمینی‌اند و برای محاسبه زمان تقریبی استفاده می‌شوند.</span>
+            </span>
+          </span>
+        </div>
+      </div>
+
+      <div class="toggle-row hidden" id="dcCurveRow">
+        <input id="dcCurve" type="checkbox" checked>
+        <label for="dcCurve" style="margin:0">استفاده از منحنی تقریبی شارژ DC</label>
+        <span class="info-tip" tabindex="0" aria-label="توضیحات منحنی تقریبی شارژ DC">
+          ?
+          <span class="info-tooltip">
+            <strong>منحنی تقریبی شارژ DC</strong>
+            <span>این گزینه افت تدریجی توان شارژ DC را در طول شارژ به‌صورت تقریبی در نظر می‌گیرد.</span>
+            <span>در دنیای واقعی، توان شارژ به درصد شارژ باتری، دمای باتری، مدل خودرو و مشخصات شارژر بستگی دارد؛ بنابراین زمان محاسبه‌شده تقریبی است.</span>
+          </span>
+        </span>
+      </div>
+      <div class="limit-note" id="limitNote"></div>
+      <div class="limit-note" id="safetyNote" style="display:none"></div>
+    </section>
+
+    <section class="card cost-card" id="costCard">
+      <h2 class="card-title">هزینه شارژ</h2>
+      <div class="feature-card">
+        <div class="feature-title">
+          <span>هزینه تقریبی</span>
+          <span class="feature-value" id="costResult">—</span>
+        </div>
+        <div class="input-wrap">
+          <input id="tariff" type="number" min="0" step="1" value="0" aria-label="تعرفه برق (تومان بر کیلووات‌ساعت)">
+          <span class="unit">تومان/kWh</span>
+        </div>
+      </div>
+      <div class="limit-note">هزینه شارژ بر اساس انرژی موردنیاز، راندمان شارژ و تعرفه برق محاسبه می‌شود.</div>
+    </section>
+
+  </div>
+
+  <div class="col">
+
+    <section class="card result" id="resultCard">
+      <div class="result-top">
+        <span class="result-label">زمان تقریبی شارژ</span>
+        <span class="range-chip" id="percent">20% ← 80%</span>
+      </div>
+
+      <div class="time">
+        <span class="num" id="hours">0</span><span class="t-unit">ساعت</span><span class="num" id="minutes">0</span><span class="t-unit">دقیقه</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <small>انرژی موردنیاز</small>
+          <strong id="energy">—</strong>
+        </div>
+        <div class="stat">
+          <small>توان شارژ</small>
+          <strong id="resultPower">—</strong>
+        </div>
+        <div class="stat">
+          <small>جریان</small>
+          <strong id="resultAmp">—</strong>
+        </div>
+      </div>
+
+      <div class="plug-row">
+        <div class="plug-tile">
+          <label for="plugTime">ساعت وصل کردن</label>
+          <input id="plugTime" type="time" value="23:00">
+        </div>
+        <div class="plug-tile finish">
+          <small>پایان شارژ</small>
+          <strong id="doneAt">—</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="chartCard">
+      <div class="chart-head">
+        <h2 class="card-title">منحنی شارژ</h2>
+        <div class="chart-start">
+          <label for="plugTime2">شروع شارژ</label>
+          <input id="plugTime2" type="time" value="23:00">
+        </div>
+      </div>
+      <svg id="chartSvg" viewBox="0 0 320 190" role="img" tabindex="0" aria-label="نمودار درصد باتری بر حسب ساعت. با کلیدهای چپ و راست ساعت را جابه‌جا کنید." style="width:100%;direction:ltr;color:var(--text)"></svg>
+      <div class="limit-note" id="chartNote"></div>
+      <div class="limit-note" id="chartHint">روی نمودار بزنید یا نشانگر را حرکت دهید تا ببینید در هر ساعت باتری حدوداً (به‌صورت تخمینی) چند درصد شارژ شده است.</div>
+    </section>
+
+    <section class="card" id="compareCard">
+      <h2 class="card-title">مقایسه شارژرها</h2>
+      <table class="compare-table">
+        <thead>
+          <tr><th>شارژر</th><th>توان واقعی</th><th>زمان</th></tr>
+        </thead>
+        <tbody id="compareBody"></tbody>
+      </table>
+    </section>
+
+  </div>
+</main>
+</div>
+
+
+<script>
+(() => {
+  const root = document.documentElement;
+  const buttons = document.querySelectorAll(".theme-btn");
+  const mq = window.matchMedia ? window.matchMedia("(prefers-color-scheme: light)") : null;
+  const KEY = "ev-calc-theme";
+
+  function load() {
+    try { return localStorage.getItem(KEY) || "auto"; } catch (e) { return "auto"; }
+  }
+  function save(v) {
+    try { localStorage.setItem(KEY, v); } catch (e) {}
+  }
+
+  let choice = load();
+
+  function applyTheme(theme) {
+    choice = theme;
+    const effective = theme === "auto" ? (mq && mq.matches ? "light" : "dark") : theme;
+    root.setAttribute("data-theme", effective);
+    buttons.forEach(btn => { const on = btn.dataset.themeChoice === theme; btn.classList.toggle("active", on); btn.setAttribute("aria-pressed", on); });
+    save(theme);
+  }
+
+  buttons.forEach(btn => btn.addEventListener("click", () => applyTheme(btn.dataset.themeChoice)));
+  if (mq) {
+    const onChange = () => { if (choice === "auto") applyTheme("auto"); };
+    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+  }
+
+  applyTheme(choice);
+})();
+</script>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  const defaults = {
+    "1": { voltage: 220, amp: 10, efficiency: 90 },
+    "3": { voltage: 380, amp: 10, efficiency: 92 },
+    "dc": { dcPower: 60, efficiency: 94 }
+  };
+
+  // Vehicle data: the dropdown is generated from this list, so label and calculation always match.
+  // batteryUsable (when known) is what the calculation uses; otherwise batteryGross.
+  // ac1/ac3/dc = approximate vehicle charging limits in kW (null = unknown, no cap applied).
+  const MEB = [[0,.7],[10,1],[30,.85],[50,.6],[70,.4],[80,.3],[90,.17],[100,.1]];
+  const E5  = [[0,.85],[10,1],[35,1],[60,.82],[70,.7],[80,.5],[90,.28],[100,.12]];
+  // V(id, label, gross kWh, usable kWh | null, AC 1-phase kW, AC 3-phase kW, DC max kW, curve)
+  // null limit = unknown (no cap applied). The calculation uses usable capacity when known.
+  const V = (id, label, gross, usable, ac1, ac3, dc, curve) =>
+    ({ id, label, batteryGross: gross, batteryUsable: usable, ac1, ac3, dc, curve });
+
+  const carModels = [
+    { id: "phoenix", name: "فونیکس FX EV / OMODA E5", variants: [
+      V("phoenix", "تیپ استاندارد", 61.06, 60, 6.6, 9.9, 80, E5)
+    ]},
+    // ID.UNYX 06: 82 gross / 77 usable, OBC 11 kW, DC 175 kW (single version found)
+    { id: "idunyx", name: "فولکس‌واگن ID.UNYX (06)", variants: [
+      V("idunyx", "تیپ استاندارد", 82, 77, 11, 11, 175, MEB)
+    ]},
+    // KMC EJ7 / EJ7 Plus: EJ7 50.1 kWh (DC cap estimated); Plus 64 kWh is unverified, caps assumed same as EJ7
+    { id: "kmcej7", name: "KMC EJ7", variants: [
+      V("kmcej7",     "EJ7",      50.1, null, 6.6, 6.6, 40),
+      V("kmcej7plus", "EJ7 Plus", 64,   null, 6.6, 6.6, 40)
+    ]},
+    // Arrizo 5 EV: 53.6 kWh (2017), facelift "Arrizo e" 54.3 kWh; 30-80% in ~30 min (DC cap estimated)
+    { id: "arizo5", name: "آریزو 5 EV", variants: [
+      V("arizo5",   "آریزو 5e",       53.6, null, 6.6, 6.6, 60),
+      V("arizo5_e", "آریزو e (فیس‌لیفت)", 54.3, null, 6.6, 6.6, 60)
+    ]},
+    // Hongqi E-QM5: 54 kWh LFP (30-80% in 30 min), 74.9 / 82 kWh NMC (30-80% in 42 min); DC caps estimated, AC unknown
+    { id: "hongqi", name: "هونگچی E-QM5", variants: [
+      V("hongqi_54", "LFP", 54,   null, null, null, 50),
+      V("hongqi_75", "NMC", 74.9, null, null, null, 80),
+      V("hongqi_82", "NMC (بزرگ)",   82,   null, null, null, 80)
+    ]},
+    // Skywell ET5: 72 kWh (68 usable, DC 80) and 86 kWh (81 usable, DC 100); AC 6.6 kW (one source says 11)
+    { id: "et5", name: "اسکای‌ول ET5", variants: [
+      V("et5_72", "نسخه 72", 72, 68, 6.6, 6.6, 80),
+      V("et5_86", "نسخه 86", 86, 81, 6.6, 6.6, 100)
+    ]},
+    // Honda e:NS1: Standard 53.6 kWh (DC ~60), Long Range 68.8 kWh (DC ~78); AC 6.6 kW 1-ph / 11 kW 3-ph
+    { id: "nsone", name: "هوندا e:NS1", variants: [
+      V("nsone_53", "Standard Range", 53.6, null, 6.6, 11, 60),
+      V("nsone_68", "Long Range",     68.8, null, 6.6, 11, 78)
+    ]},
+    // MG4: 51 LFP (50.8 usable, AC 6.6, DC ~88), 64 NMC (61.7 usable, AC 11, DC 135), 77 (74.4 usable, DC 144)
+    { id: "mg4", name: "MG4 EV", variants: [
+      V("mg4_51", "Standard Range", 51, 50.8, 6.6, 6.6, 88),
+      V("mg4_64", "Long Range",     64, 61.7, 11,  11,  135, MEB),
+      V("mg4_77", "Trophy / Extended", 77, 74.4, 11, 11, 144, MEB)
+    ]},
+    // ID.4: Pure 55 gross / 52 usable (AC 7.2, DC ~110); Pro 82 gross / 77 usable (AC 11, DC 135, newer 175)
+    { id: "id4", name: "فولکس‌واگن ID.4", variants: [
+      V("id4_pure", "Pure", 55, 52, 7.2, 7.2, 110, MEB),
+      V("id4_pro",  "Pro",  82, 77, 11,  11,  135, MEB)
+    ]},
+    // Q5 e-tron (SAIC Audi): both versions share 83.4 gross / 76.6 usable; DC cap not confirmed
+    { id: "q5etron", name: "آئودی Q5 e-tron", variants: [
+      V("q5_40", "Q5 e-tron 40",        83.4, 76.6, 11, 11, 140, MEB),
+      V("q5_50", "Q5 e-tron 50 quattro", 83.4, 76.6, 11, 11, 140, MEB)
+    ]},
+    // Q4 e-tron: 35 = 55 gross / 51.5 net (DC 100, AC 7.2); 40 and 50 quattro = 82 gross / 76.6 net (DC 125, AC 11)
+    { id: "q4etron", name: "آئودی Q4 e-tron", variants: [
+      V("q4_35", "Q4 35 e-tron",        55, 51.5, 7.2, 7.2, 100, MEB),
+      V("q4_40", "Q4 40 e-tron",        82, 76.6, 11,  11,  125, MEB),
+      V("q4_50", "Q4 50 e-tron quattro", 82, 76.6, 11,  11,  125, MEB)
+    ]},
+    // Luna GRE (JMEV Yi, 110 kW): battery ~60 kWh; AC/DC figures NOT verified (DC 100 from a user comment)
+    { id: "luna", name: "لونا GRE (برقی)", variants: [
+      V("luna_gre", "GRE ‏110 kW", 60, null, 6.6, 6.6, 100)
+    ]},
+    { id: "custom", name: "✏️ خودروی دلخواه (ورود دستی)", variants: [
+      V("custom", "ورود دستی مشخصات", 60, null, 7.4, 7.4, 60)
+    ]}
+  ];
+
+  const carLimits = {};
+  carModels.forEach(m => m.variants.forEach(v => { carLimits[v.id] = v; }));
+
+  function selectedCarKey() { return $("carVariant").value || "phoenix"; }
+
+  function fillVariants() {
+    const m = carModels.find(x => x.id === $("carModel").value) || carModels[0];
+    const sel = $("carVariant");
+    sel.innerHTML = "";
+    m.variants.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v.id;
+      opt.textContent = m.id === "custom" ? v.label
+        : v.label + " — " + (v.batteryUsable || v.batteryGross) + " kWh" + (v.batteryUsable ? " (مفید)" : "");
+      sel.appendChild(opt);
+    });
+    sel.value = m.variants[0].id;
+  }
+
+  (function fillModels() {
+    const sel = $("carModel");
+    carModels.forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m.id; opt.textContent = m.name;
+      sel.appendChild(opt);
+    });
+    sel.value = "phoenix";
+    fillVariants();
+  })();
+
+  function updateEfficiencyForMode() {
+    if (!$("autoEfficiency").checked) return;
+    const d = defaults[$("phase").value];
+    if (d && d.efficiency) $("efficiency").value = d.efficiency;
+  }
+
+  function dcFactor(soc) {
+    if (soc < 30) return 1.00;
+    if (soc < 50) return 0.96;
+    if (soc < 70) return 0.90;
+    if (soc < 80) return 0.72;
+    if (soc < 90) return 0.52;
+    return 0.32;
+  }
+
+  function curveAt(c, soc) {
+    for (let i = 1; i < c.length; i++) {
+      if (soc <= c[i][0]) {
+        const a = c[i - 1], b = c[i], f = (soc - a[0]) / (b[0] - a[0] || 1);
+        return a[1] + (b[1] - a[1]) * f;
+      }
+    }
+    return c[c.length - 1][1];
+  }
+
+  // DC power at a given SoC. Car-specific curve = share of the car's own max DC power.
+  function dcPowerAt(soc, power, useCurve, car, charger) {
+    if (!useCurve) return power;
+    if (car && car.curve && car.dc) return Math.min(charger, car.dc * curveAt(car.curve, soc));
+    return power * dcFactor(soc);
+  }
+
+  function dcChargeHours(energy, power, from, to, useCurve, car, charger) {
+    if (!useCurve || power <= 0) return energy / Math.max(.01, power);
+    const steps = 100, span = Math.max(.01, to - from);
+    const ePerPct = energy / span, step = span / steps;
+    let hours = 0;
+    for (let i = 0; i < steps; i++) {
+      hours += ePerPct * step / Math.max(.01, dcPowerAt(from + (i + .5) * step, power, useCurve, car, charger));
+    }
+    return hours;
+  }
+
+  let chartState = null;
+
+  function fmtClock(total) {
+    const day = Math.floor(total / 1440);
+    const m = ((Math.round(total) % 1440) + 1440) % 1440;
+    return { t: String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"), d: day };
+  }
+  function dayWord(d) { return d <= 0 ? "" : (d === 1 ? "فردا" : d + " روز بعد"); }
+
+  function drawChart(battery, from, to, eff, phase, power, useCurve, limit, requested) {
+    const pts = [[0, from]]; let t = 0;
+    const n = Math.max(1, Math.round(to - from)), step = (to - from) / n;
+    for (let i = 0; i < n; i++) {
+      const soc = from + (i + .5) * step, e = battery * step / 100;
+      const h = phase === "dc"
+        ? (e / (eff / 100)) / Math.max(.01, dcPowerAt(soc, power, useCurve, limit, requested))
+        : e / (Math.max(.01, power) * eff / 100);
+      t += h * 60; pts.push([t, from + (i + 1) * step]);
+    }
+    const [hh, mm] = ($("plugTime").value || "23:00").split(":").map(Number);
+    const st = (hh || 0) * 60 + (mm || 0);
+
+    const W = 320, H = 190, L = 34, R = 12, T = 14, B = 40, pw = W - L - R, ph = H - T - B, tm = Math.max(t, 1);
+    const X = v => (L + v / tm * pw).toFixed(1), Y = v => (T + ph - v / 100 * ph).toFixed(1);
+    const line = pts.map((p, i) => (i ? "L" : "M") + X(p[0]) + " " + Y(p[1])).join("");
+    const grid = [0, 25, 50, 75, 100].map(v =>
+      `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="currentColor" opacity=".12"/>` +
+      `<text x="${L - 6}" y="${+Y(v) + 3}" text-anchor="end" font-size="9" fill="currentColor" opacity=".6">${v}%</text>`).join("");
+
+    // clock labels: start, end, midnights, and round hours that fit without crowding
+    const minGap = 44 / pw * tm, endAbs = st + tm;
+    const mids = [];
+    for (let a = Math.ceil((st + .001) / 1440) * 1440; a < endAbs - .001; a += 1440) {
+      if (a - st >= minGap && endAbs - a >= minGap) mids.push(a);
+    }
+    let ticks = [];
+    for (const stp of [5, 10, 15, 30, 60, 120, 180, 240, 360, 720, 1440]) {
+      const arr = [];
+      for (let a = Math.ceil((st + .001) / stp) * stp; a < endAbs - .001; a += stp) {
+        if (a - st >= minGap && endAbs - a >= minGap && mids.every(m => Math.abs(m - a) >= minGap)) arr.push(a);
+      }
+      if (arr.length + mids.length <= 3) { ticks = arr; break; }
+    }
+    const marks = [[st, "start"], ...ticks.map(a => [a, "middle"]), ...mids.map(a => [a, "middle"]), [endAbs, "end"]];
+    const xl = marks.map(([a, anchor]) => {
+      const c = fmtClock(a), x = X(a - st), dw = dayWord(c.d);
+      return `<line x1="${x}" x2="${x}" y1="${T + ph}" y2="${T + ph + 4}" stroke="currentColor" opacity=".35"/>` +
+        `<text x="${x}" y="${T + ph + 16}" text-anchor="${anchor}" font-size="10" fill="currentColor" opacity=".85">${c.t}</text>` +
+        (dw ? `<text x="${x}" y="${T + ph + 29}" text-anchor="${anchor}" font-size="9" fill="currentColor" opacity=".6">${dw}</text>` : "");
+    }).join("");
+    const midLines = mids.map(a =>
+      `<line x1="${X(a - st)}" x2="${X(a - st)}" y1="${T}" y2="${T + ph}" stroke="currentColor" opacity=".3" stroke-dasharray="3 3"/>`).join("");
+
+    $("chartSvg").innerHTML = grid + midLines + xl +
+      `<path d="${line}L${X(t)} ${Y(0)}L${X(0)} ${Y(0)}Z" fill="var(--primary)" opacity=".15"/>` +
+      `<path d="${line}" fill="none" stroke="var(--primary)" stroke-width="2.2" stroke-linejoin="round"/>` +
+      `<circle cx="${X(0)}" cy="${Y(from)}" r="3.5" fill="var(--primary)"/>` +
+      `<circle cx="${X(t)}" cy="${Y(to)}" r="3.5" fill="var(--primary)"/>` +
+      `<g id="chartCursor"></g>`;
+    chartState = { pts, tm, st, W, L, R, T, ph, pw, cursor: null };
+
+    $("chartNote").textContent = phase !== "dc" ? "در شارژ AC توان ثابت فرض شده است."
+      : !useCurve ? "منحنی DC غیرفعال است؛ توان ثابت فرض شده است."
+      : limit && limit.curve ? "منحنی تقریبی مخصوص همین خودرو؛ مقدار واقعی به دما و شارژر بستگی دارد."
+      : "منحنی عمومی تقریبی؛ برای این خودرو داده‌ی اختصاصی نداریم.";
+  }
+
+  function showCursor(elapsed) {
+    const c = chartState; if (!c) return;
+    elapsed = Math.max(0, Math.min(c.tm, elapsed));
+    c.cursor = elapsed;
+    let soc = c.pts[c.pts.length - 1][1];
+    for (let i = 1; i < c.pts.length; i++) {
+      if (elapsed <= c.pts[i][0]) {
+        const a = c.pts[i - 1], b = c.pts[i];
+        soc = a[1] + (b[1] - a[1]) * (elapsed - a[0]) / ((b[0] - a[0]) || 1);
+        break;
+      }
+    }
+    const x = c.L + elapsed / c.tm * c.pw, y = c.T + c.ph - soc / 100 * c.ph;
+    const ck = fmtClock(c.st + elapsed);
+    const label = ck.t + (ck.d > 0 ? " (" + dayWord(ck.d) + ")" : "") + " · " + Math.round(soc) + "%";
+    const w = label.length * 5.6 + 16, bx = Math.min(Math.max(x - w / 2, c.L), c.W - c.R - w);
+    const by = y < c.T + 40 ? c.T + c.ph - 30 : c.T + 4;
+    $("chartCursor").innerHTML =
+      `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${c.T}" y2="${c.T + c.ph}" stroke="var(--primary)" stroke-width="1.2" stroke-dasharray="3 3"/>` +
+      `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="var(--card-solid)" stroke="var(--primary)" stroke-width="2.5"/>` +
+      `<rect x="${bx.toFixed(1)}" y="${by}" width="${w.toFixed(1)}" height="22" rx="7" fill="var(--tip-bg)" stroke="var(--field-border)"/>` +
+      `<text x="${(bx + w / 2).toFixed(1)}" y="${by + 15}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text)">${label}</text>`;
+  }
+
+  function hideCursor() {
+    if (chartState) chartState.cursor = null;
+    const g = $("chartCursor"); if (g) g.innerHTML = "";
+  }
+
+  function cursorFromEvent(ev) {
+    const c = chartState; if (!c) return;
+    const r = $("chartSvg").getBoundingClientRect();
+    const vx = (ev.clientX - r.left) / r.width * c.W;
+    showCursor((vx - c.L) / c.pw * c.tm);
+  }
+
+  function fmtTime(mins) {
+    mins = Math.max(0, Math.round(mins));
+    return Math.floor(mins / 60) + " ساعت " + (mins % 60) + " دقیقه";
+  }
+
+  function updateCompare(battery, from, to, efficiency, limit) {
+    const energy = battery * (to - from) / 100;
+    const auto = $("autoEfficiency").checked;
+
+    // kind: "1" = AC single-phase 220 V, "3" = AC three-phase 380 V, "dc" = DC fast charger
+    const rows = [
+      ["AC تک‌فاز 8A",  8 * 220 / 1000,                    "1"],
+      ["AC تک‌فاز 16A", 16 * 220 / 1000,                   "1"],
+      ["AC تک‌فاز 32A", 32 * 220 / 1000,                   "1"],
+      ["AC سه‌فاز 16A", Math.sqrt(3) * 380 * 16 / 1000,    "3"],
+      ["DC 60kW",       60,                                "dc"],
+      ["DC 120kW",      120,                               "dc"]
+    ];
+
+    $("compareBody").innerHTML = rows.map(row => {
+      const kind = row[2];
+      const vehicleLimit = kind === "dc" ? limit.dc : kind === "3" ? limit.ac3 : limit.ac1;
+      const power = vehicleLimit ? Math.min(row[1], vehicleLimit) : row[1];
+
+      const eff = auto ? defaults[kind].efficiency : efficiency;
+      const hours = kind === "dc"
+        ? dcChargeHours(energy / (eff / 100), power, from, to, $("dcCurve").checked, limit, row[1])
+        : energy / (Math.max(.01, power) * eff / 100);
+
+      return `<tr>
+        <td>${row[0]}</td>
+        <td><strong>${power.toFixed(1)} kW</strong></td>
+        <td>${fmtTime(hours * 60)}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  function syncUi(from, to) {
+    // dual-handle bar: fill between the two handles (RTL: 0% is on the right)
+    $("dualFill").style.right = from + "%";
+    $("dualFill").style.width = Math.max(0, to - from) + "%";
+    // when the two handles overlap, keep on top the one that has more room to move
+    $("from").style.zIndex = from > (100 - to) ? 3 : 2;
+    $("to").style.zIndex = from > (100 - to) ? 2 : 3;
+
+    const phase = $("phase").value;
+    document.querySelectorAll("#phaseTabs button").forEach(b => {
+      const on = b.dataset.phase === phase;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-pressed", on);
+    });
+  }
+
+  function calculate() {
+    if (selectedCarKey() === "custom") {
+      const c = carLimits.custom, a = parseFloat($("customAc").value) || null;
+      c.batteryGross = parseFloat($("customBattery").value) || 0;
+      c.ac1 = a; c.ac3 = a; c.dc = parseFloat($("customDc").value) || null;
+    }
+    $("customCarFields").classList.toggle("hidden", selectedCarKey() !== "custom");
+    const selectedLimit = carLimits[selectedCarKey()] || {};
+    const battery = selectedLimit.batteryUsable || selectedLimit.batteryGross || 0;
+    const efficiency = Math.min(
+      100,
+      Math.max(50, parseFloat($("efficiency").value) || 90)
+    );
+
+    let from = Math.min(99, Math.max(0, parseFloat($("fromNumber").value) || 0));
+    let to = Math.min(100, Math.max(1, parseFloat($("toNumber").value) || 1));
+
+    if (to <= from) to = Math.min(100, from + 1);
+
+    $("from").value = from;
+    $("fromNumber").value = from;
+    $("to").value = to;
+    $("toNumber").value = to;
+    $("fromValue").textContent = from;
+    $("toValue").textContent = to;
+    syncUi(from, to);
+
+    const phase = $("phase").value;
+    const limit = carLimits[selectedCarKey()] || {};
+
+    let requested = 0;
+
+    if (phase === "dc") {
+      requested = Math.max(.01, parseFloat($("dcPower").value) || .01);
+    } else {
+      const voltage = parseFloat($("voltage").value) || 0;
+      const amp = parseFloat($("amp").value) || 0;
+
+      requested = phase === "3"
+        ? Math.sqrt(3) * voltage * amp / 1000
+        : voltage * amp / 1000;
+    }
+
+    const vehicleLimit = phase === "dc"
+      ? limit.dc
+      : phase === "3"
+        ? limit.ac3
+        : limit.ac1;
+
+    const power = vehicleLimit
+      ? Math.min(requested, vehicleLimit)
+      : requested;
+
+    $("power").value = power.toFixed(2);
+
+    const energy = battery * (to - from) / 100;
+    const useCurve = phase === "dc" && $("dcCurve").checked;
+
+    const hours = phase === "dc"
+      ? dcChargeHours(energy / (efficiency / 100), power, from, to, useCurve, limit, requested)
+      : energy / (Math.max(.01, power) * efficiency / 100);
+
+    const mins = Math.max(0, Math.round(hours * 60));
+
+    $("hours").textContent = Math.floor(mins / 60);
+    $("minutes").textContent = mins % 60;
+    $("energy").textContent = energy.toFixed(1) + " kWh";
+    $("resultPower").textContent = power.toFixed(2) + " kW";
+    $("percent").textContent = from + "% ← " + to + "%";
+    $("resultAmp").textContent = phase === "dc"
+      ? "DC"
+      : (parseFloat($("amp").value) || 0).toFixed(1).replace(".0", "") + " A";
+
+    if ($("limitNote")) {
+      $("limitNote").textContent =
+        vehicleLimit && requested > vehicleLimit
+          ? `توان شارژر ${requested.toFixed(1)} kW است، اما سقف تقریبی خودرو ${vehicleLimit} kW است؛ محاسبه با ${power.toFixed(1)} kW انجام شد.`
+          : "";
+    }
+
+    const tariff = parseFloat($("tariff").value) || 0;
+    $("costResult").textContent = tariff > 0
+      ? (energy / Math.max(.01, efficiency / 100) * tariff)
+          .toLocaleString("fa-IR") + " تومان"
+      : "—";
+
+    updateCompare(battery, from, to, efficiency, limit);
+    drawChart(battery, from, to, efficiency, phase, power, useCurve, limit, requested);
+
+    const amps = parseFloat($("amp").value) || 0;
+    document.querySelectorAll("#quickAmps button").forEach(b => {
+      const on = parseFloat(b.dataset.a) === amps;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-pressed", on);
+    });
+    const dcNow = parseFloat($("dcPower").value) || 0;
+    document.querySelectorAll("#quickDcPower button").forEach(b => {
+      const on = parseFloat(b.dataset.dcPower) === dcNow;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-pressed", on);
+    });
+    let msg = "";
+    if (phase !== "dc" && amps >= 20) msg = "⚠️ شارژ پیوسته با این جریان فشار زیادی به سیم‌کشی و کلید مدار وارد می‌کند؛ حتماً پیش از استفاده با برق‌کار بررسی کنید و از سه‌راهی و کابل رابط معمولی استفاده نکنید.";
+    else if (phase !== "dc" && amps >= 16) msg = "ℹ️ شارژ چندساعته با این جریان بار پیوسته است؛ پیش از استفاده از ظرفیت سیم‌کشی و کلید مدار مطمئن شوید.";
+    else if (phase !== "dc" && amps > 0 && amps <= 10) msg = "ℹ️ این جریان تقریباً در حد پریز معمولی است؛ شارژ بسیار کند است و پریز و سیم‌کشی باید برای بار پیوسته سالم باشد.";
+    $("safetyNote").textContent = msg;
+    $("safetyNote").style.display = msg ? "" : "none";
+    $("highSocNote").style.display = to > 90 ? "" : "none";
+
+    const [hh, mm] = ($("plugTime").value || "23:00").split(":").map(Number);
+    const tot = hh * 60 + mm + mins, days = Math.floor(tot / 1440);
+    $("doneAt").textContent = String(Math.floor(tot / 60) % 24).padStart(2, "0") + ":" + String(tot % 60).padStart(2, "0") +
+      (days > 0 ? (days === 1 ? " (فردا)" : ` (${days} روز بعد)`) : "");
+  }
+
+  function resetChargerFields() {
+    const phase = $("phase").value;
+    const d = defaults[phase];
+
+    $("voltage").value = d?.voltage ?? 220;
+    $("amp").value = d?.amp ?? 32;
+    $("dcPower").value = d?.dcPower ?? 60;
+
+    const dc = phase === "dc";
+
+    $("acVoltageField").classList.toggle("hidden", dc);
+    $("acAmpField").classList.toggle("hidden", dc);
+    $("acPowerField").classList.toggle("hidden", dc);
+    $("dcPowerField").classList.toggle("hidden", !dc);
+    $("quickAmps").classList.toggle("hidden", dc);
+    $("dcPowerSliderRow").classList.toggle("hidden", !dc);
+    $("quickDcPower").classList.toggle("hidden", !dc);
+    $("dcCurveRow").classList.toggle("hidden", !dc);
+
+    if (dc) {
+      $("dcPowerSlider").value = $("dcPower").value;
+      $("dcPowerNumber").value = $("dcPower").value;
+      $("dcPowerValue").textContent = $("dcPower").value;
+    }
+
+    updateEfficiencyForMode();
+    calculate();
+  }
+
+  $("phase").addEventListener("change", resetChargerFields);
+  $("carModel").addEventListener("change", () => { fillVariants(); calculate(); });
+  $("plugTime").addEventListener("input", () => { $("plugTime2").value = $("plugTime").value; });
+  $("plugTime").addEventListener("change", () => { $("plugTime2").value = $("plugTime").value; });
+  ["input", "change"].forEach(evn => $("plugTime2").addEventListener(evn, () => {
+    $("plugTime").value = $("plugTime2").value || "23:00";
+    calculate();
+  }));
+
+  const chartEl = $("chartSvg");
+  chartEl.addEventListener("pointermove", cursorFromEvent);
+  chartEl.addEventListener("pointerdown", cursorFromEvent);
+  chartEl.addEventListener("pointerleave", ev => { if (ev.pointerType === "mouse") hideCursor(); });
+  chartEl.addEventListener("keydown", ev => {
+    const c = chartState; if (!c) return;
+    const k = ev.key, cur = c.cursor === null ? 0 : c.cursor;
+    if (k === "ArrowRight") showCursor(cur + 15);
+    else if (k === "ArrowLeft") showCursor(cur - 15);
+    else if (k === "Home") showCursor(0);
+    else if (k === "End") showCursor(c.tm);
+    else if (k === "Escape") hideCursor();
+    else return;
+    ev.preventDefault();
+  });
+
+  ["carVariant", "customBattery", "customAc", "customDc", "plugTime"].forEach(id => {
+    $(id).addEventListener("input", calculate);
+    $(id).addEventListener("change", calculate);
+  });
+
+  $("autoEfficiency").addEventListener("change", () => {
+    $("efficiency").disabled = $("autoEfficiency").checked;
+    updateEfficiencyForMode();
+    calculate();
+  });
+
+  $("efficiency").disabled = $("autoEfficiency").checked;
+
+  [
+    "efficiency", "from", "to", "fromNumber", "toNumber",
+    "voltage", "amp", "dcPower", "tariff"
+  ].forEach(id => {
+    $(id).addEventListener("input", () => {
+      if (id === "from") $("fromNumber").value = $("from").value;
+      if (id === "fromNumber") $("from").value = $("fromNumber").value;
+      if (id === "to") $("toNumber").value = $("to").value;
+      if (id === "toNumber") $("to").value = $("toNumber").value;
+
+      if (id === "dcPower") {
+        $("dcPowerSlider").value = $("dcPower").value;
+        $("dcPowerNumber").value = $("dcPower").value;
+        $("dcPowerValue").textContent = $("dcPower").value;
+      }
+
+      calculate();
+    });
+  });
+
+  $("dcCurve").addEventListener("change", calculate);
+
+  $("dcPowerSlider").addEventListener("input", () => {
+    $("dcPower").value = $("dcPowerSlider").value;
+    $("dcPowerNumber").value = $("dcPowerSlider").value;
+    $("dcPowerValue").textContent = $("dcPowerSlider").value;
+    calculate();
+  });
+
+  $("dcPowerNumber").addEventListener("input", () => {
+    $("dcPower").value = $("dcPowerNumber").value;
+    $("dcPowerSlider").value = $("dcPowerNumber").value;
+    $("dcPowerValue").textContent = $("dcPowerNumber").value;
+    calculate();
+  });
+
+  document.querySelectorAll("#quickAmps button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      $("amp").value = btn.dataset.a;
+      calculate();
+    });
+  });
+
+  document.querySelectorAll("#quickDcPower button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const value = btn.dataset.dcPower;
+      $("dcPower").value = value;
+      $("dcPowerSlider").value = value;
+      $("dcPowerNumber").value = value;
+      $("dcPowerValue").textContent = value;
+      calculate();
+    });
+  });
+
+  document.querySelectorAll("#phaseTabs button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if ($("phase").value === btn.dataset.phase) return;
+      $("phase").value = btn.dataset.phase;
+      resetChargerFields();
+    });
+  });
+
+  resetChargerFields();
+</script>
+
+
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})});}
+</script>
+</body>
+</html>
